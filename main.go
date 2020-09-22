@@ -50,7 +50,7 @@ func main() {
 		logrus.StandardLogger(),
 	)
 	logrus.Debugf(
-		"Initialized drone-promote-auth extension with the following list of users allowed to promote: %x",
+		"Initialized drone-promote-auth extension with the following list of users allowed to promote: %v",
 		spec.AllowedUsers,
 	)
 

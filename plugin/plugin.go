@@ -40,6 +40,7 @@ type plugin struct {
 }
 
 func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
+	logrus.Debugf("Received %s request from %s", req.Build.Event, req.Build.Sender)
 	if stringInSlice(req.Build.Event, restrictedEvents) &&
 		(!stringInSlice(req.Build.Sender, p.allowedUsers)) {
 		logrus.Debugf("user %s not allowed to %s", req.Build.Sender, req.Build.Event)
