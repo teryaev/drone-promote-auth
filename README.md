@@ -3,6 +3,8 @@
 
 A validation extension to Drone validation plugin to restrict users who can promote builds. _Please note this project requires Drone server version 1.4 or higher._
 
+Docker image -- https://hub.docker.com/r/reptiloid666/drone-promote-auth
+
 ## Installation
 
 Create a shared secret:
