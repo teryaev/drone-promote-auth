@@ -70,8 +70,8 @@ func TestPlugin(t *testing.T) {
 		{
 			input: &validator.Request{
 				Build: drone.Build{
-					Event:  "promote",
-					Sender: "octopus",
+					Event:   "promote",
+					Trigger: "octopus",
 				},
 			},
 			expectedResult: nil,
@@ -79,8 +79,8 @@ func TestPlugin(t *testing.T) {
 		{
 			input: &validator.Request{
 				Build: drone.Build{
-					Event:  "promote",
-					Sender: "intruder",
+					Event:   "promote",
+					Trigger: "intruder",
 				},
 			},
 			expectedResult: validator.ErrBlock,
