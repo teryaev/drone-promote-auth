@@ -83,7 +83,7 @@ func TestPlugin(t *testing.T) {
 					Trigger: "intruder",
 				},
 			},
-			expectedResult: validator.ErrBlock,
+			expectedResult: validator.ErrSkip,
 		},
 	}
 

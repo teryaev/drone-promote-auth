@@ -44,7 +44,7 @@ func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
 	if stringInSlice(req.Build.Event, restrictedEvents) &&
 		(!stringInSlice(req.Build.Trigger, p.allowedUsers)) {
 		logrus.Debugf("user %s not allowed to %s", req.Build.Trigger, req.Build.Event)
-		return validator.ErrBlock
+		return validator.ErrSkip
 	}
 
 	return nil
