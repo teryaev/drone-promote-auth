@@ -21,7 +21,7 @@ $ docker run -d \
   --env=DRONE_SECRET=bea26a2221fd8090ea38720fc445eca6 \
   --env=DRONE_ALLOWED_USERS=user1,user2,user3 \
   --restart=always \
-  --name=starlark reptiloid666/drone-promote-auth
+  --name=drone-promote-auth reptiloid666/drone-promote-auth
 ```
 
 Update your Drone server configuration to include the plugin address and the shared secret.
