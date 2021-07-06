@@ -51,14 +51,14 @@ type plugin struct {
 
 func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
 	logrus.Debugf("Received %s request from %s", req.Build.Event, req.Build.Trigger)
-	logrus.Debugf("Targeted env is %s", req.Build.Target)
+	logrus.Debugf("Targeted env is %s", req.Build.Deploy)
 	// check if this event requires auth
 	if stringInSlice(req.Build.Event, restrictedEvents) {
 		// check if user is privilged to promote to any env
 		if stringInSlice(req.Build.Trigger, p.privilegedUsers) {
 			logrus.Debugf(
 				"User %s has been authorized to %s %s env as a privileged user",
-				req.Build.Trigger, req.Build.Event, req.Build.Target,
+				req.Build.Trigger, req.Build.Event, req.Build.Deploy,
 			)
 			return nil
 		}
@@ -66,16 +66,16 @@ func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
 		// check if user has any per-env permission
 		if allowedEnvs, userHasPermissions := p.userPermissions[req.Build.Trigger]; userHasPermissions {
 			// check if user is allowed to promote to a requested env
-			if stringInSlice(req.Build.Target, allowedEnvs) {
+			if stringInSlice(req.Build.Deploy, allowedEnvs) {
 				logrus.Debugf(
 					"User %s has been authorized to %s %s env according to user level permissions",
-					req.Build.Trigger, req.Build.Event, req.Build.Target,
+					req.Build.Trigger, req.Build.Event, req.Build.Deploy,
 				)
 				return nil
 			}
 		}
 
-		logrus.Debugf("user %s not allowed to %s to %s", req.Build.Trigger, req.Build.Event, req.Build.Target)
+		logrus.Debugf("user %s not allowed to %s to %s", req.Build.Trigger, req.Build.Event, req.Build.Deploy)
 		return validator.ErrSkip
 	}
 
