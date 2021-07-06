@@ -94,7 +94,7 @@ func TestPlugin(t *testing.T) {
 				Build: drone.Build{
 					Event:   "promote",
 					Trigger: "johndoe",
-					Target:  "uat",
+					Deploy:  "uat",
 				},
 			},
 			expectedResult: nil,
@@ -104,7 +104,7 @@ func TestPlugin(t *testing.T) {
 				Build: drone.Build{
 					Event:   "promote",
 					Trigger: "johndoe",
-					Target:  "prod",
+					Deploy:  "prod",
 				},
 			},
 			expectedResult: validator.ErrSkip,
@@ -114,7 +114,7 @@ func TestPlugin(t *testing.T) {
 				Build: drone.Build{
 					Event:   "promote",
 					Trigger: "lucifer",
-					Target:  "prod",
+					Deploy:  "prod",
 				},
 			},
 			expectedResult: nil,
@@ -124,7 +124,7 @@ func TestPlugin(t *testing.T) {
 				Build: drone.Build{
 					Event:   "promote",
 					Trigger: "lucifer",
-					Target:  "prod",
+					Deploy:  "prod",
 				},
 			},
 			expectedResult: nil,
