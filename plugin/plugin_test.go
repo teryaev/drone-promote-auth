@@ -50,9 +50,13 @@ func TestStringInSlice(t *testing.T) {
 }
 
 func TestPlugin(t *testing.T) {
-	allowedUsers := []string{
+	privilegedUsers := []string{
 		"octopus",
 		"admin",
+	}
+	userPermissions := map[string]string{
+		"johndoe": "uat",
+		"lucifer": "uat;prod",
 	}
 
 	cases := []struct {
@@ -85,9 +89,49 @@ func TestPlugin(t *testing.T) {
 			},
 			expectedResult: validator.ErrSkip,
 		},
+		{
+			input: &validator.Request{
+				Build: drone.Build{
+					Event:   "promote",
+					Trigger: "johndoe",
+					Target:  "uat",
+				},
+			},
+			expectedResult: nil,
+		},
+		{
+			input: &validator.Request{
+				Build: drone.Build{
+					Event:   "promote",
+					Trigger: "johndoe",
+					Target:  "prod",
+				},
+			},
+			expectedResult: validator.ErrSkip,
+		},
+		{
+			input: &validator.Request{
+				Build: drone.Build{
+					Event:   "promote",
+					Trigger: "lucifer",
+					Target:  "prod",
+				},
+			},
+			expectedResult: nil,
+		},
+		{
+			input: &validator.Request{
+				Build: drone.Build{
+					Event:   "promote",
+					Trigger: "lucifer",
+					Target:  "prod",
+				},
+			},
+			expectedResult: nil,
+		},
 	}
 
-	plugin := New(allowedUsers)
+	plugin := New(privilegedUsers, userPermissions)
 
 	for tcIdx, tc := range cases {
 		actualResult := plugin.Validate(context.Background(), tc.input)

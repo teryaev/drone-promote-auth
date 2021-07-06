@@ -6,7 +6,6 @@ package main
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/drone/drone-go/plugin/validator"
 	"github.com/teryaev/drone-promote-auth/plugin"
@@ -22,7 +21,8 @@ type spec struct {
 	Debug  bool   `envconfig:"DRONE_DEBUG"`
 	Secret string `envconfig:"DRONE_SECRET"`
 
-	AllowedUsers string `envconfig:"DRONE_ALLOWED_USERS"`
+	PrivilegedUsers []string          `envconfig:"PRIVILEGED_USERS"`
+	UserPermissions map[string]string `envconfig:"USER_PERMISSIONS"`
 }
 
 func main() {
@@ -45,13 +45,14 @@ func main() {
 	handler := validator.Handler(
 		spec.Secret,
 		plugin.New(
-			strings.Split(spec.AllowedUsers, ","),
+			spec.PrivilegedUsers,
+			spec.UserPermissions,
 		),
 		logrus.StandardLogger(),
 	)
 	logrus.Debugf(
-		"Initialized drone-promote-auth extension with the following list of users allowed to promote: %v",
-		spec.AllowedUsers,
+		"Initialized drone-promote-auth extension with the following list of priliged users that are allowed to promote to any env: %v",
+		spec.PrivilegedUsers,
 	)
 
 	logrus.Infof("server listening on address %s", spec.Bind)
