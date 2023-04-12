@@ -54,10 +54,13 @@ func TestPlugin(t *testing.T) {
 		"octopus",
 		"admin",
 	}
-	userPermissions := map[string]string{
-		"johndoe": "uat",
-		"lucifer": "uat;prod",
-	}
+	userPermissions := `
+johndoe,uat,repo1
+johndoe,uat,repo2
+lucifer,uat,repo1
+lucifer,uat,repo2
+lucifer,prod,repo1
+`
 
 	cases := []struct {
 		input          *validator.Request
@@ -96,6 +99,9 @@ func TestPlugin(t *testing.T) {
 					Trigger: "johndoe",
 					Deploy:  "uat",
 				},
+				Repo: drone.Repo{
+					Name: "repo1",
+				},
 			},
 			expectedResult: nil,
 		},
@@ -116,6 +122,9 @@ func TestPlugin(t *testing.T) {
 					Trigger: "lucifer",
 					Deploy:  "prod",
 				},
+				Repo: drone.Repo{
+					Name: "repo1",
+				},
 			},
 			expectedResult: nil,
 		},
@@ -126,8 +135,24 @@ func TestPlugin(t *testing.T) {
 					Trigger: "lucifer",
 					Deploy:  "prod",
 				},
+				Repo: drone.Repo{
+					Name: "repo1",
+				},
 			},
 			expectedResult: nil,
+		},
+		{
+			input: &validator.Request{
+				Build: drone.Build{
+					Event:   "promote",
+					Trigger: "lucifer",
+					Deploy:  "prod",
+				},
+				Repo: drone.Repo{
+					Name: "repo2",
+				},
+			},
+			expectedResult: validator.ErrSkip,
 		},
 	}
 

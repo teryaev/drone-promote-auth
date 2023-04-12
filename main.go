@@ -21,8 +21,8 @@ type spec struct {
 	Debug  bool   `envconfig:"DRONE_DEBUG"`
 	Secret string `envconfig:"DRONE_SECRET"`
 
-	PrivilegedUsers []string          `envconfig:"PRIVILEGED_USERS"`
-	UserPermissions map[string]string `envconfig:"USER_PERMISSIONS"`
+	PrivilegedUsers []string `envconfig:"PRIVILEGED_USERS"`
+	UserPermissions string   `envconfig:"USER_PERMISSIONS"`
 }
 
 func main() {

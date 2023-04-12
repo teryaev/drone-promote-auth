@@ -6,9 +6,10 @@ package plugin
 
 import (
 	"context"
+	"encoding/csv"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/drone/drone-go/plugin/validator"
 )
@@ -30,12 +31,26 @@ func stringInSlice(str string, slice []string) bool {
 }
 
 // New returns a new validator plugin.
-func New(privilegedUsers []string, userPermissionsRaw map[string]string) validator.Plugin {
-	userPermissions := make(map[string][]string)
+func New(privilegedUsers []string, userPermissionsRaw string) validator.Plugin {
+	//userPermissionsRaw sturcture `0.userName, 1.env, 2.repoName`
+	userData, err := csv.NewReader(strings.NewReader(userPermissionsRaw)).ReadAll()
+	if err != nil {
+		log.Error(err)
+	}
 
-	// parse list of envs each user is allowed to promote builds to
-	for user, envString := range userPermissionsRaw {
-		userPermissions[user] = strings.Split(envString, ";")
+	userPermissions := make(map[string]map[string][]string)
+	for _, row := range userData {
+		userMap, ok := userPermissions[row[0]]
+		if !ok {
+			userMap = make(map[string][]string)
+			userPermissions[row[0]] = userMap
+		}
+		userEnv, ok := userMap[row[1]]
+		if !ok {
+			userEnv = make([]string, 0)
+			userMap[row[1]] = userEnv
+		}
+		userMap[row[1]] = append(userEnv, row[2])
 	}
 
 	return &plugin{
@@ -46,34 +61,41 @@ func New(privilegedUsers []string, userPermissionsRaw map[string]string) validat
 
 type plugin struct {
 	privilegedUsers []string
-	userPermissions map[string][]string
+	userPermissions map[string]map[string][]string
 }
 
 func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
+	fields := log.Fields{
+		"user":  req.Build.Trigger,
+		"event": req.Build.Event,
+		"env":   req.Build.Deploy,
+		"repo":  req.Repo.Name,
+	}
 	// check if this event requires auth
 	if stringInSlice(req.Build.Event, restrictedEvents) {
 		// check if user is privilged to promote to any env
 		if stringInSlice(req.Build.Trigger, p.privilegedUsers) {
-			logrus.Debugf(
-				"User %s has been authorized to %s to/on %s env as a privileged user",
-				req.Build.Trigger, req.Build.Event, req.Build.Deploy,
+			log.WithFields(fields).Info(
+				"User has been authorized as a privileged user",
 			)
 			return nil
 		}
 
-		// check if user has any per-env permission
+		// check if user has any per-env[repo] permission
 		if allowedEnvs, userHasPermissions := p.userPermissions[req.Build.Trigger]; userHasPermissions {
 			// check if user is allowed to promote to a requested env
-			if stringInSlice(req.Build.Deploy, allowedEnvs) {
-				logrus.Debugf(
-					"User %s has been authorized to %s to/on %s env according to user level permissions",
-					req.Build.Trigger, req.Build.Event, req.Build.Deploy,
-				)
-				return nil
-			}
-		}
 
-		logrus.Debugf("user %s not allowed to %s to/on %s", req.Build.Trigger, req.Build.Event, req.Build.Deploy)
+			for env, repos := range allowedEnvs {
+				if env == req.Build.Deploy && stringInSlice(req.Repo.Name, repos) {
+					log.WithFields(fields).Info(
+						"User has been authorized according to user level permissions",
+					)
+					return nil
+				}
+			}
+
+		}
+		log.WithFields(fields).Info("User is not allowed")
 		return validator.ErrSkip
 	}
 
