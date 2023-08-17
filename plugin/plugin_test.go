@@ -154,6 +154,19 @@ lucifer,prod,repo1
 			},
 			expectedResult: validator.ErrSkip,
 		},
+		{
+			input: &validator.Request{
+				Build: drone.Build{
+					Event:   "promote",
+					Trigger: "any_user",
+					Deploy:  "staging",
+				},
+				Repo: drone.Repo{
+					Name: "any_repo1",
+				},
+			},
+			expectedResult: nil,
+		},
 	}
 
 	plugin := New(privilegedUsers, userPermissions)
