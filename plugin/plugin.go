@@ -74,7 +74,7 @@ func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
 	// check if this event requires auth
 	if stringInSlice(req.Build.Event, restrictedEvents) {
 		// check if env is staging and avaialable for all users
-		if req.Build.Deploy == "staging" {
+		if strings.HasPrefix(req.Build.Deploy, "staging") {
 			log.WithFields(fields).Info(
 				"User has been authorized for staging env",
 			)
