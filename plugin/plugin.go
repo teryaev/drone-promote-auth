@@ -71,7 +71,7 @@ func (p *plugin) Validate(ctx context.Context, req *validator.Request) error {
 		"env":   req.Build.Deploy,
 		"repo":  req.Repo.Name,
 	}
-	log.WithField("config", req.Config.Data).Info("Validating build")
+	log.WithFields(fields).WithField("config", req.Config.Data).Info("Validating build")
 
 	// check if this event requires auth
 	if stringInSlice(req.Build.Event, restrictedEvents) {
